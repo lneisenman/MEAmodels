@@ -55,7 +55,9 @@ class IzhCell():
         self.synlist.append(syn)
 
     def connect2target(self, target):
+        self.soma.push()
         nc = h.NetCon(self.soma(0.5)._ref_v, target)
+        h.pop_section()
         return nc
     
     def class1(self):

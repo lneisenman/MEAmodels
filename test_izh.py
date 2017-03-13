@@ -56,7 +56,7 @@ def simulate_pair():
 
 def simulate_net(stim_percentage=5):
 
-    net = IzhNet(500, inhibitory=20, ex_con=20, inh_con=50, ampa_gmax=0.008)
+    net = IzhNet(500, inhibitory=20, ex_con=20, inh_con=50, ampa_gmax=0.00006)
 
     # instumentation
     recording = nu.SpikeRecorder(net.cell_list())
@@ -77,7 +77,7 @@ def simulate_net(stim_percentage=5):
         stim.noise = 0.5
         stims.append(stim)
         stim.number = 10e12
-        ncstim = h.NetCon(stim, net.cell_list()[int(net.NCELL*i/num_stim)].synlist.object(0))
+        ncstim = h.NetCon(stim, net.cell_list()[int(net.NCELL*i/num_stim)].synlist[0])
         ncstim.weight[0] = 0.0002
         ncstim.delay = 0
         ncstims.append(ncstim)
@@ -91,7 +91,7 @@ def simulate_net(stim_percentage=5):
     sc.set_fixed_dt(0.1)
     sc.set_v_init(-60)
     sc.set_celsius(36)
-    sc.stdrun(60000)
+    sc.stdrun(10000)
 
     # output the results
 #    recording.print_spikes()
@@ -99,8 +99,8 @@ def simulate_net(stim_percentage=5):
 #    plt.plot(tvec, vvec)
 #    plt.figure()
 #    recording.save_spikes('baseline.csv')
-    nur.draw_raster_plot(recording)
-    nur.draw_raster_plot(read_baseline(), color='r', display=True)
+    nur.draw_raster_plot(recording, display=True)
+#    nur.draw_raster_plot(read_baseline(), color='r', display=True)
 
 
 def read_baseline(file_name='baseline.csv'):

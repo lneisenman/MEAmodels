@@ -8,6 +8,8 @@ __pycache__/
 *.c
 *.lo
 x86_64/
+mod_files/*.*~
+hoc_files/*.*~
 
 # Distribution / packaging
 .Python
