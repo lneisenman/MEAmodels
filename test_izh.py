@@ -12,21 +12,25 @@ import netutils.raster as nur
 
 from izh_cell import IzhCell
 from Izh_net import IzhNet
+from ranstream import RandomStream
 
 
 def simulate():
     ''' create a neuron '''
 
     cell = IzhCell()
-    cell.class2()
+    cell.RS()
+    cell.izh.amp = 10
+    cell.izh.delay = 100
+    cell.izh.dur = 1e9
 
     tvec = h.Vector()
     tvec.record(h._ref_t)
     vvec = h.Vector()
     vvec.record(cell.soma(0.5)._ref_v)
-    h.v_init = -60
+    h.v_init = -70
     h.dt = 0.1
-    h.tstop = 200
+    h.tstop = 300
     h.run()
     plt.plot(tvec, vvec)
     plt.show()
@@ -46,7 +50,33 @@ def simulate_pair():
     tvec.record(h._ref_t)
     vvec = h.Vector()
     vvec.record(cell2.soma(0.5)._ref_v)
-    h.v_init = -60
+    h.v_init = -65
+    h.dt = 0.1
+    h.tstop = 1000
+    h.run()
+    plt.plot(tvec, vvec)
+    plt.show()
+
+
+def test_noise():
+    cell = IzhCell()
+    cell.RS()
+
+    cell.rs = RandomStream(1)
+    cell.rs.normal(0, 1)
+
+    cell.noise = h.InGauss(0.5, sec=cell.soma)
+    cell.noise.mean = 0
+    cell.noise.stdev = 0.02
+    cell.noise.delay = 0
+    cell.noise.dur = 1e9
+    cell.noise.noiseFromRandom(cell.rs.r)
+
+    tvec = h.Vector()
+    tvec.record(h._ref_t)
+    vvec = h.Vector()
+    vvec.record(cell.soma(0.5)._ref_v)
+    h.v_init = -70
     h.dt = 0.1
     h.tstop = 1000
     h.run()
@@ -56,7 +86,7 @@ def simulate_pair():
 
 def simulate_net(stim_percentage=5):
 
-    net = IzhNet(500, inhibitory=20, ex_con=20, inh_con=50, ampa_gmax=0.00006)
+    net = IzhNet(1000, inhibitory=20, ex_con=20, inh_con=90, ampa_gmax=0.00006)
 
     # instumentation
     recording = nu.SpikeRecorder(net.cell_list())
@@ -68,19 +98,19 @@ def simulate_net(stim_percentage=5):
 #    net.cell_list()[5].set_bias(0.100001)
 #    net.cell_list()[-5].set_bias(0.1000002)
 
-    stims = list()
-    ncstims = list()
-    num_stim = int(net.NCELL*stim_percentage/100)
-    for i in range(num_stim):
-        stim = h.NetStim(0.5)
-        stim.interval = 50000 / (num_stim - i)
-        stim.noise = 0.5
-        stims.append(stim)
-        stim.number = 10e12
-        ncstim = h.NetCon(stim, net.cell_list()[int(net.NCELL*i/num_stim)].synlist[0])
-        ncstim.weight[0] = 0.0002
-        ncstim.delay = 0
-        ncstims.append(ncstim)
+#    stims = list()
+#    ncstims = list()
+#    num_stim = int(net.NCELL*stim_percentage/100)
+#    for i in range(num_stim):
+#        stim = h.NetStim(0.5)
+#        stim.interval = 50000 / (num_stim - i)
+#        stim.noise = 0.5
+#        stims.append(stim)
+#        stim.number = 10e12
+#        ncstim = h.NetCon(stim, net.cell_list()[int(net.NCELL*i/num_stim)].synlist[0])
+#        ncstim.weight[0] = 0.0002
+#        ncstim.delay = 0
+#        ncstims.append(ncstim)
 
     tvec = h.Vector()
     tvec.record(h._ref_t)
@@ -115,5 +145,6 @@ if __name__ == "__main__":
     h.load_file("stdrun.hoc")
 #    simulate()
 #    simulate_pair()
-    simulate_net()
+    test_noise()
+#    simulate_net()
 #    read_baseline()

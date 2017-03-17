@@ -27,6 +27,7 @@ class IzhNet(nu.BaseNet):
                  ampa_gmax=0.006, gaba_gmax=0.067):
 
         super().__init__(NCELL, make_cell_fcn)
+        self.set_cell_properties()
         self.INHIBITORY = inhibitory
         self.N_I = int(self.NCELL*inhibitory/100)       # Number of inibitory cells
         self.N_E = self.NCELL - self.N_I                # Number of excitatory cells
@@ -47,6 +48,10 @@ class IzhNet(nu.BaseNet):
         self.insert_ranstreams()
         self.connect_cells()
         self.make_stim()
+
+    def set_cell_properties(self):
+        for cell in self.cellList:
+            cell.class2()
 
     def insert_ranstreams(self):
         for i, cell in enumerate(self.cellList):
